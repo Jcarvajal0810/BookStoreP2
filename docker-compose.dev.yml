@@ -1,0 +1,22 @@
+﻿version: '3.8'
+services:
+  mongo:
+    image: mongo
+    container_name: bs2_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  catalog:
+    build: ./catalog
+    container_name: bs2_catalog
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/catalogdb
+    depends_on:
+      - mongo
+
+volumes:
+  mongo_data:
