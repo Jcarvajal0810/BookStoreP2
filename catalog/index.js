@@ -15,8 +15,8 @@ app.use(express.json());
 // Conexión a MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ Conectado a MongoDB"))
-  .catch((err) => console.error("❌ Error de conexión:", err));
+  .then(() => console.log(" Conectado a MongoDB"))
+  .catch((err) => console.error(" Error de conexión:", err));
 
 // Modelo de libro
 const BookSchema = new mongoose.Schema({
@@ -40,4 +40,4 @@ app.get("/api/books", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Catalog service running on port ${PORT}`));
+app.listen(PORT, () => console.log(` Catalog service running on port ${PORT}`));

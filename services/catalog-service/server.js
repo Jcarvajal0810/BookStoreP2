@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import bookRoutes from "./src/routes/bookRoutes.js";
 
 dotenv.config();
+console.log("🔍 MONGO_URI cargado desde .env:", process.env.MONGO_URI);
 
 const app = express();
 app.use(express.json());
@@ -18,7 +19,7 @@ const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 
 if (!MONGO_URI) {
-  console.error("❌ MONGO_URI is not defined. Set it in .env or environment variables.");
+  console.error(" MONGO_URI is not defined. Set it in .env or environment variables.");
   process.exit(1);
 }
 
@@ -27,10 +28,10 @@ mongoose.connect(MONGO_URI, {
   useUnifiedTopology: true
 })
 .then(() => {
-  console.log("✅ Connected to MongoDB");
-  app.listen(PORT, () => console.log(`🚀 catalog-service running on port ${PORT}`));
+  console.log(" Connected to MongoDB");
+  app.listen(PORT, () => console.log(` catalog-service running on port ${PORT}`));
 })
 .catch(err => {
-  console.error("❌ Mongo connection error:", err);
+  console.error(" Mongo connection error:", err);
   process.exit(1);
 });

@@ -2,11 +2,14 @@
 
 const bookSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  image: String,
-  author: String,
-  description: String,
+  image: { type: String, default: "/images/default.jpg" },
+  author: { type: String, required: true },
+  description: { type: String },
   countInStock: { type: Number, default: 0 },
-  price: { type: Number, required: true }
-}, { timestamps: true });
+  price: { type: Number, default: 0 }
+}, {
+  timestamps: true
+});
 
-export default mongoose.model("Book", bookSchema);
+const Book = mongoose.model("Book", bookSchema);
+export default Book;
