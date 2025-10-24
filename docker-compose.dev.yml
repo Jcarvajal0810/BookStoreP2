@@ -1,7 +1,9 @@
 ﻿version: '3.8'
 
 services:
-  #  Base de datos MongoDB
+  # ==========================
+  # Base de datos MongoDB (Local)
+  # ==========================
   mongo:
     image: mongo
     container_name: bs2_mongo
@@ -10,18 +12,22 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  #  Servicio de Catálogo
+  # ==========================
+  # Servicio de Catálogo
+  # ==========================
   catalog:
     build: ./catalog
     container_name: bs2_catalog
     ports:
       - "3000:3000"
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/catalogdb
+    env_file:
+      - ./catalog/.env
     depends_on:
       - mongo
 
-  #  Servicio de Pedidos (Order)
+  # ==========================
+  # Servicio de Pedidos (Order)
+  # ==========================
   order:
     build: ./order
     container_name: bs2_order
@@ -29,19 +35,35 @@ services:
       - "4000:4000"
     env_file:
       - ./order/.env
-    # No depende de mongo porque usa Atlas o su propio cluster
 
-  #  Servicio de Carrito (Cart)
+  # ==========================
+  # Servicio de Carrito (Cart)
+  # ==========================
   cart:
     build: ./cart-service
     container_name: bs2_cart
     ports:
       - "5000:5000"
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/bookstore_cart
-      - PORT=5000
+    env_file:
+      - ./cart-service/.env
     depends_on:
       - mongo
 
+  # ==========================
+  # Servicio de Inventario (Inventory)
+  # ==========================
+  inventory:
+    build: ./inventary-service   # ← Respeto tu estructura original
+    container_name: bs2_inventory
+    ports:
+      - "8000:6000"              # ← Puertos corregidos (antes estaban mal)
+    env_file:
+      - ./inventary-service/.env
+    depends_on:
+      - mongo
+
+# ==========================
+# Volúmenes
+# ==========================
 volumes:
   mongo_data:
