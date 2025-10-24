@@ -1,14 +1,15 @@
-# controlador simple en memoria (puedes cambiar a Mongo después)
-fake_inventory = {
-    'book-001': 10,
-    'book-002': 4,
-    'book-003': 0
-}
+from ..config.database import inventory_collection
 
 def check_stock(book_id: str):
-    # devuelve 0 si no existe
-    return fake_inventory.get(book_id, 0)
+    item = inventory_collection.find_one({'book_id': book_id})
+    if item:
+        return item['stock']
+    return 0
 
 def update_stock(book_id: str, quantity: int):
-    fake_inventory[book_id] = quantity
+    inventory_collection.update_one(
+        {'book_id': book_id},
+        {'$set': {'stock': quantity}},
+        upsert=True
+    )
     return {'book_id': book_id, 'new_quantity': quantity}

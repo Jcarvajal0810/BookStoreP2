@@ -1,69 +1,54 @@
-﻿version: '3.8'
+version: '3.8'
 
 services:
-  # ==========================
-  # Base de datos MongoDB (Local)
-  # ==========================
-  mongo:
-    image: mongo
-    container_name: bs2_mongo
+  user-service:
+    build: ./user-service
+    container_name: bs2_user
     ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
+      - "6000:6000"
+    environment:
+      - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/userdb?retryWrites=true&w=majority&appName=SharedM0
 
-  # ==========================
-  # Servicio de Catálogo
-  # ==========================
+  user-scheduler:
+    build: ./user-scheduler
+    container_name: bs2_user_scheduler
+    environment:
+      - USER_SERVICE_URL=http://user-service:6000
+      - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/userdb?retryWrites=true&w=majority&appName=SharedM0
+    depends_on:
+      - user-service
+
   catalog:
     build: ./catalog
     container_name: bs2_catalog
     ports:
       - "3000:3000"
-    env_file:
-      - ./catalog/.env
-    depends_on:
-      - mongo
+    environment:
+      - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/catalogdb?retryWrites=true&w=majority&appName=SharedM0
 
-  # ==========================
-  # Servicio de Pedidos (Order)
-  # ==========================
   order:
     build: ./order
     container_name: bs2_order
     ports:
       - "4000:4000"
-    env_file:
-      - ./order/.env
+    environment:
+      - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/orderdb?retryWrites=true&w=majority&appName=SharedM0
 
-  # ==========================
-  # Servicio de Carrito (Cart)
-  # ==========================
   cart:
     build: ./cart-service
     container_name: bs2_cart
     ports:
       - "5000:5000"
-    env_file:
-      - ./cart-service/.env
-    depends_on:
-      - mongo
+    environment:
+      - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/bookstore_cart?retryWrites=true&w=majority&appName=SharedM0
 
-  # ==========================
-  # Servicio de Inventario (Inventory)
-  # ==========================
   inventory:
-    build: ./inventary-service   # ← Respeto tu estructura original
+    build: ./inventary-service
     container_name: bs2_inventory
     ports:
-      - "8000:6000"              # ← Puertos corregidos (antes estaban mal)
-    env_file:
-      - ./inventary-service/.env
-    depends_on:
-      - mongo
+      - "8000:6000"
+    environment:
+      - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/inventorydb?retryWrites=true&w=majority&appName=SharedM0
 
-# ==========================
-# Volúmenes
-# ==========================
 volumes:
   mongo_data:
