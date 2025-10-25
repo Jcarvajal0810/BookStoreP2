@@ -11,7 +11,12 @@ import java.util.Optional;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final UserService userService;
-    public AuthController(UserService userService){ this.userService = userService; }
+    private final JwtUtil jwtUtil;
+    
+    public AuthController(UserService userService, JwtUtil jwtUtil){ 
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
+    }
 
     @PostMapping("/register")
     public Map<String,Object> register(@RequestBody User u){
@@ -19,7 +24,7 @@ public class AuthController {
             return Map.of("error","username_exists");
         }
         User saved = userService.register(u);
-        String token = JwtUtil.generateToken(saved.getUsername(), saved.getRole());
+        String token = jwtUtil.generateToken(saved.getUsername(), saved.getRole());
         return Map.of("user", saved, "token", token);
     }
 
@@ -31,9 +36,7 @@ public class AuthController {
         if(ou.isEmpty()) return Map.of("error","invalid_credentials");
         User user = ou.get();
         if(!userService.checkPassword(password, user.getPassword())) return Map.of("error","invalid_credentials");
-        String token = JwtUtil.generateToken(user.getUsername(), user.getRole());
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
         return Map.of("user", user, "token", token);
     }
 }
-
-
