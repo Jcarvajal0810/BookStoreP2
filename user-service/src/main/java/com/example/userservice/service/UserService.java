@@ -2,47 +2,55 @@ package com.example.userservice.service;
 
 import com.example.userservice.model.User;
 import com.example.userservice.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserService {
-    private final UserRepository repo;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository repo){
-        this.repo = repo;
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    public User register(User u){
-        u.setPassword(encoder.encode(u.getPassword()));
-        if(u.getRole()==null) u.setRole("ROLE_USER");
-        return repo.save(u);
+    public User register(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
     }
 
-    public Optional<User> findByUsername(String username){
-        return repo.findByUsername(username);
+    public boolean checkPassword(String raw, String encoded) {
+        return passwordEncoder.matches(raw, encoded);
     }
 
-    public Optional<User> findById(String id){
-        return repo.findById(id);
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
-    public User updateUser(String id, User updates){
-        Optional<User> existing = repo.findById(id);
-        if(existing.isEmpty()) return null;
-        
-        User user = existing.get();
-        
-        // Actualizar solo los campos permitidos (no password ni role)
-        if(updates.getEmail() != null) user.setEmail(updates.getEmail());
-        if(updates.getUsername() != null) user.setUsername(updates.getUsername());
-        
-        return repo.save(user);
+    public Optional<User> findById(String id) {
+        return userRepository.findById(id);
     }
 
-    public boolean checkPassword(String raw, String encoded){
-        return encoder.matches(raw, encoded);
+    public User updateUser(String id, User updates) {
+        return userRepository.findById(id).map(existing -> {
+            if (updates.getUsername() != null) existing.setUsername(updates.getUsername());
+            if (updates.getEmail() != null) existing.setEmail(updates.getEmail());
+            if (updates.getRole() != null) existing.setRole(updates.getRole());
+            if (updates.getPassword() != null && !updates.getPassword().isEmpty())
+                existing.setPassword(passwordEncoder.encode(updates.getPassword()));
+            return userRepository.save(existing);
+        }).orElse(null);
+    }
+
+    // ✅ Métodos agregados para compatibilidad con ExtraUserController
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
+    }
+
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 }

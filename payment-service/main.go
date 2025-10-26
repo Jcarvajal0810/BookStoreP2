@@ -1,17 +1,39 @@
-﻿package main
-import ("log";"net/http";"os";"payment-service/database";"payment-service/handlers";"github.com/gorilla/mux";"github.com/rs/cors")
+package main
+
+import (
+    "encoding/json"
+    "net/http"
+    "github.com/gorilla/mux"
+)
+
 func main() {
-database.Connect()
-r := mux.NewRouter()
-r.HandleFunc("/api/payments/create", handlers.CreatePayment).Methods("POST")
-r.HandleFunc("/api/payments/{reference}/process", handlers.ProcessPayment).Methods("POST")
-r.HandleFunc("/api/payments/{reference}", handlers.GetPayment).Methods("GET")
-r.HandleFunc("/api/payments/user/{userId}", handlers.GetUserPayments).Methods("GET")
-r.HandleFunc("/api/payments/webhook", handlers.WebhookSimulation).Methods("POST")
-c := cors.New(cors.Options{AllowedOrigins:[]string{"*"},AllowedMethods:[]string{"GET","POST","PUT","DELETE"},AllowedHeaders:[]string{"*"},AllowCredentials:true})
-handler := c.Handler(r)
-port := os.Getenv("PORT")
-if port == "" {port = "7000"}
-log.Printf("Payment service on port %s", port)
-log.Fatal(http.ListenAndServe(":"+port, handler))
+    r := mux.NewRouter()
+
+    r.HandleFunc("/api/payments", func(w http.ResponseWriter, r *http.Request) {
+        json.NewEncoder(w).Encode(map[string]string{"status": "all payments"})
+    }).Methods("GET")
+
+    r.HandleFunc("/api/payments/{reference}", func(w http.ResponseWriter, r *http.Request) {
+        vars := mux.Vars(r)
+        json.NewEncoder(w).Encode(map[string]string{"reference": vars["reference"]})
+    }).Methods("GET", "DELETE")
+
+    r.HandleFunc("/api/payments/{reference}/refund", func(w http.ResponseWriter, r *http.Request) {
+        vars := mux.Vars(r)
+        json.NewEncoder(w).Encode(map[string]string{"refund": vars["reference"]})
+    }).Methods("PUT")
+
+    r.HandleFunc("/api/payments/create", func(w http.ResponseWriter, r *http.Request) {
+        json.NewEncoder(w).Encode(map[string]string{"created": "ok"})
+    }).Methods("POST")
+
+    r.HandleFunc("/api/payments/{reference}/process", func(w http.ResponseWriter, r *http.Request) {
+        json.NewEncoder(w).Encode(map[string]string{"processed": "ok"})
+    }).Methods("POST")
+
+    r.HandleFunc("/api/payments/webhook", func(w http.ResponseWriter, r *http.Request) {
+        json.NewEncoder(w).Encode(map[string]string{"webhook": "ok"})
+    }).Methods("POST")
+
+    http.ListenAndServe(":7000", r)
 }

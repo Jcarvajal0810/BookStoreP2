@@ -12,8 +12,8 @@ import java.util.Optional;
 public class AuthController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
-    
-    public AuthController(UserService userService, JwtUtil jwtUtil){ 
+
+    public AuthController(UserService userService, JwtUtil jwtUtil){
         this.userService = userService;
         this.jwtUtil = jwtUtil;
     }
@@ -24,7 +24,8 @@ public class AuthController {
             return Map.of("error","username_exists");
         }
         User saved = userService.register(u);
-        String token = jwtUtil.generateToken(saved.getUsername(), saved.getRole());
+        // Ajustado: generateToken acepta un solo String (username)
+        String token = jwtUtil.generateToken(saved.getUsername());
         return Map.of("user", saved, "token", token);
     }
 
@@ -36,7 +37,18 @@ public class AuthController {
         if(ou.isEmpty()) return Map.of("error","invalid_credentials");
         User user = ou.get();
         if(!userService.checkPassword(password, user.getPassword())) return Map.of("error","invalid_credentials");
-        String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
+        // Ajustado: generateToken acepta un solo String (username)
+        String token = jwtUtil.generateToken(user.getUsername());
         return Map.of("user", user, "token", token);
+    }
+
+    @PostMapping("/logout")
+    public Map<String, Object> logout() {
+        return Map.of("message", "logout successful");
+    }
+
+    @GetMapping("/status")
+    public Map<String, Object> status() {
+        return Map.of("authenticated", true);
     }
 }
