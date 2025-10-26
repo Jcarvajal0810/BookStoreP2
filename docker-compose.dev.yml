@@ -8,6 +8,7 @@ services:
       - "6000:6000"
     environment:
       - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/userdb?retryWrites=true&w=majority&appName=SharedM0
+    restart: unless-stopped
 
   user-scheduler:
     build: ./user-scheduler
@@ -17,6 +18,7 @@ services:
       - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/userdb?retryWrites=true&w=majority&appName=SharedM0
     depends_on:
       - user-service
+    restart: unless-stopped
 
   catalog:
     build: ./catalog
@@ -25,6 +27,7 @@ services:
       - "3000:3000"
     environment:
       - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/catalogdb?retryWrites=true&w=majority&appName=SharedM0
+    restart: unless-stopped
 
   order:
     build: ./order
@@ -33,6 +36,7 @@ services:
       - "4000:4000"
     environment:
       - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/orderdb?retryWrites=true&w=majority&appName=SharedM0
+    restart: unless-stopped
 
   cart:
     build: ./cart-service
@@ -40,7 +44,9 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/bookstore_cart?retryWrites=true&w=majority&appName=SharedM0
+      - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/cartdb?retryWrites=true&w=majority&appName=SharedM0
+      - PORT=5000
+    restart: unless-stopped
 
   inventory:
     build: ./inventary-service
@@ -49,6 +55,8 @@ services:
       - "8000:6000"
     environment:
       - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/inventorydb?retryWrites=true&w=majority&appName=SharedM0
+      - PORT=6000
+    restart: unless-stopped
 
   payment:
     build: ./payment-service
