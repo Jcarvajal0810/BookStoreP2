@@ -23,7 +23,8 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/actuator/**").permitAll()
+                // LÍNEA CORREGIDA: Se añade /api/users/register al acceso público
+                .requestMatchers("/api/auth/**", "/actuator/**", "/api/users/register").permitAll() 
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

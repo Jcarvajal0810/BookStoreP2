@@ -1,33 +1,23 @@
 package com.example.userservice.model;
 
-import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Document(collection = "users")
 public class User {
-    
+
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    
-    @Column(unique = true, nullable = false)
+
     private String username;
-    
-    @Column(unique = true, nullable = false)
     private String email;
-    
-    @Column(nullable = false)
     private String password;
-    
-    @Column
     private String role = "USER";
-    
-    @Column
     private boolean active = true;
 }

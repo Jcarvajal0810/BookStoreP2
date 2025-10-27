@@ -7,8 +7,12 @@ services:
     ports:
       - "6000:6000"
     environment:
+      - PORT=6000
       - MONGO_URI=mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/userdb?retryWrites=true&w=majority&appName=SharedM0
+      - JWT_SECRET=WNXRO/cJDB5vORlhPq0098HAlggUdTu/Tk+E7Aqsd54=
     restart: unless-stopped
+
+ 
 
   user-scheduler:
     build: ./user-scheduler
