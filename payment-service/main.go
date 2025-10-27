@@ -1,39 +1,44 @@
 package main
 
 import (
-    "encoding/json"
-    "net/http"
-    "github.com/gorilla/mux"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/gorilla/mux"
+	"payment-service/handlers"
+	"payment-service/database"
 )
 
 func main() {
-    r := mux.NewRouter()
+	// Leer variables de entorno (por compatibilidad, aunque no se usen en Connect)
+	mongoURI := os.Getenv("MONGO_URI")
+	if mongoURI == "" {
+		mongoURI = "mongodb+srv://Jcarvajal0810:Nutella_0810@sharedm0.d3q2w0n.mongodb.net/paymentdb?retryWrites=true&w=majority&appName=SharedM0"
+		log.Println("  MONGO_URI no encontrada, usando valor por defecto.")
+	}
 
-    r.HandleFunc("/api/payments", func(w http.ResponseWriter, r *http.Request) {
-        json.NewEncoder(w).Encode(map[string]string{"status": "all payments"})
-    }).Methods("GET")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "7000"
+	}
 
-    r.HandleFunc("/api/payments/{reference}", func(w http.ResponseWriter, r *http.Request) {
-        vars := mux.Vars(r)
-        json.NewEncoder(w).Encode(map[string]string{"reference": vars["reference"]})
-    }).Methods("GET", "DELETE")
+	//  Llamar a Connect() sin pasar argumentos
+	database.Connect()
+	log.Println(" Conectado correctamente a MongoDB Atlas")
 
-    r.HandleFunc("/api/payments/{reference}/refund", func(w http.ResponseWriter, r *http.Request) {
-        vars := mux.Vars(r)
-        json.NewEncoder(w).Encode(map[string]string{"refund": vars["reference"]})
-    }).Methods("PUT")
+	// Router principal
+	r := mux.NewRouter()
 
-    r.HandleFunc("/api/payments/create", func(w http.ResponseWriter, r *http.Request) {
-        json.NewEncoder(w).Encode(map[string]string{"created": "ok"})
-    }).Methods("POST")
+	// Endpoints del servicio de pagos
+	r.HandleFunc("/api/payments/create", handlers.CreatePayment).Methods("POST")
+	r.HandleFunc("/api/payments/{reference}/process", handlers.ProcessPayment).Methods("POST")
+	r.HandleFunc("/api/payments/{reference}", handlers.GetPayment).Methods("GET")
+	r.HandleFunc("/api/payments/user/{userId}", handlers.GetUserPayments).Methods("GET")
+	r.HandleFunc("/api/payments/{reference}", handlers.DeletePayment).Methods("DELETE")
+	r.HandleFunc("/api/payments/webhook", handlers.WebhookSimulation).Methods("POST")
 
-    r.HandleFunc("/api/payments/{reference}/process", func(w http.ResponseWriter, r *http.Request) {
-        json.NewEncoder(w).Encode(map[string]string{"processed": "ok"})
-    }).Methods("POST")
-
-    r.HandleFunc("/api/payments/webhook", func(w http.ResponseWriter, r *http.Request) {
-        json.NewEncoder(w).Encode(map[string]string{"webhook": "ok"})
-    }).Methods("POST")
-
-    http.ListenAndServe(":7000", r)
+	// Servidor web
+	log.Printf(" Payment Service corriendo en el puerto %s...\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }
