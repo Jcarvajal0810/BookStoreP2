@@ -1,7 +1,15 @@
 from pymongo import MongoClient
 import os
+from dotenv import load_dotenv
 
-MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/inventorydb')
+# Cargar variables de entorno (.env)
+load_dotenv()
+
+MONGO_URI = os.getenv('MONGO_URI')
+
+# Conexión a MongoDB Atlas
 client = MongoClient(MONGO_URI)
-db = client.get_database()
-inventory_collection = db['inventory']
+db = client["inventorydb"]
+inventory_collection = db["inventory"]
+
+print(" Conectado a MongoDB Atlas correctamente")
